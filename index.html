@@ -232,7 +232,7 @@ const CONFIG = {
   UPLOAD_URL: "https://albertobortolottoit.github.io/albumfoto-angela-alberto/",
   MAX_SIDE:   1600,     // lato lungo massimo dopo compressione
   JPEG_Q:     0.82,     // qualità JPEG
-  MAX_VIDEO:  50*1024*1024,
+  MAX_VIDEO:  500*1024*1024,
   ADMIN_CODE: "angela2026"   // apri la pagina con ?admin=angela2026
 };
 
@@ -273,7 +273,7 @@ function addFiles(list){
     const isVid = f.type.startsWith("video/");
     if (!isImg && !isVid){ rifiutati.push(f.name + " (formato non supportato)"); continue; }
     if (isVid && f.size > CONFIG.MAX_VIDEO){
-      rifiutati.push(f.name + " (video troppo lungo, max 50 MB)"); continue;
+      rifiutati.push(f.name + " (video troppo lungo, max 500 MB)"); continue;
     }
     selected.push(f);
   }
