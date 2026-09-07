@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Angela &amp; Alberto — L'album di tutti</title>
+<meta name="description" content="Carica le tue foto del matrimonio di Angela e Alberto e guarda l'album condiviso con gli scatti di tutti gli invitati." />
+
+<meta property="og:title" content="Angela &amp; Alberto — L'album di tutti" />
+<meta property="og:description" content="Condividi i tuoi scatti del nostro matrimonio." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --avorio:#FAF5EC; --avorio-caldo:#FFFDF8; --inchiostro:#43382B;
+  --inchiostro-50:#8c8275; --oro:#C2A14D; --oro-chiaro:#E3D2A0;
+  --ombra:0 18px 50px -28px rgba(67,56,43,.45); --raggio:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(120% 60% at 50% -10%, #fffdf8 0%, var(--avorio) 55%), var(--avorio);
+  color:var(--inchiostro);font-family:'Jost',sans-serif;font-weight:300;line-height:1.65;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;
+}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:500;line-height:1.05}
+.mark{color:var(--oro);font-size:.9rem;letter-spacing:.4em}
+.eyebrow{font-weight:400;letter-spacing:.42em;text-transform:uppercase;font-size:.7rem;color:var(--oro)}
+.wrap{max-width:680px;margin:0 auto;padding:0 22px}
+
+header{padding:46px 0 8px;text-align:center}
+header .names{font-size:clamp(2.7rem,11vw,4.2rem);margin:.18em 0 .12em}
+header .amp{font-style:italic;color:var(--oro);font-weight:400}
+header .date{font-family:'Jost',sans-serif;font-weight:300;letter-spacing:.5em;font-size:.82rem;color:var(--inchiostro-50);padding-left:.5em}
+header .place{font-style:italic;color:var(--inchiostro-50);font-size:1.05rem;margin-top:6px}
+
+.divider{display:flex;align-items:center;gap:16px;margin:30px auto;max-width:240px;color:var(--oro)}
+.divider::before,.divider::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--oro-chiaro))}
+.divider::after{background:linear-gradient(90deg,var(--oro-chiaro),transparent)}
+
+.hero{text-align:center;padding:8px 0 6px}
+.hero h1{font-size:clamp(2.2rem,9vw,3.2rem);margin-bottom:.3em}
+.hero h1 em{color:var(--oro);font-weight:400}
+.hero p{max-width:46ch;margin:0 auto;opacity:.9}
+
+.qr-card{position:relative;background:var(--avorio-caldo);border-radius:var(--raggio);box-shadow:var(--ombra);padding:38px 28px 34px;margin:40px auto;max-width:360px;text-align:center}
+.qr-card::before,.qr-card::after{content:"";position:absolute;width:30px;height:30px;border:1.5px solid var(--oro)}
+.qr-card::before{top:14px;left:14px;border-right:0;border-bottom:0}
+.qr-card::after{bottom:14px;right:14px;border-left:0;border-top:0}
+.qr-card .corner-tr,.qr-card .corner-bl{position:absolute;width:30px;height:30px;border:1.5px solid var(--oro)}
+.qr-card .corner-tr{top:14px;right:14px;border-left:0;border-bottom:0}
+.qr-card .corner-bl{bottom:14px;left:14px;border-right:0;border-top:0}
+.qr-card .label{font-family:'Cormorant Garamond',serif;font-size:1.9rem;margin:6px 0 2px}
+.qr-card .sub{font-size:.86rem;color:var(--inchiostro-50);margin-bottom:22px}
+#qrcode{display:inline-block;padding:14px;background:#fff;border-radius:10px;border:1px solid var(--oro-chiaro);line-height:0}
+#qrcode img,#qrcode canvas{display:block}
+.qr-card .hint{margin-top:18px;font-size:.78rem;color:var(--inchiostro-50)}
+.qr-link{display:inline-block;margin-top:6px;font-size:.78rem;color:var(--oro);word-break:break-all;text-decoration:none;border-bottom:1px solid var(--oro-chiaro)}
+
+.section-title{text-align:center;margin-bottom:8px}
+.section-title h2{font-size:clamp(2rem,7vw,2.6rem)}
+.section-title .eyebrow{display:block;margin-bottom:10px}
+
+.upload{background:var(--avorio-caldo);border:1px solid var(--oro-chiaro);border-radius:var(--raggio);padding:26px 22px;margin:24px auto;box-shadow:var(--ombra)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--inchiostro-50);margin-bottom:7px}
+.field input[type=text]{width:100%;padding:13px 15px;border:1px solid var(--oro-chiaro);border-radius:9px;background:#fff;font-family:'Jost',sans-serif;font-size:1rem;color:var(--inchiostro)}
+.field input[type=text]:focus{outline:none;border-color:var(--oro);box-shadow:0 0 0 3px rgba(194,161,77,.15)}
+
+.dropzone{border:1.5px dashed var(--oro);border-radius:11px;padding:26px 18px;text-align:center;background:rgba(227,210,160,.12);cursor:pointer;transition:background .2s}
+.dropzone:hover,.dropzone.drag{background:rgba(227,210,160,.28)}
+.dropzone .icon{font-size:1.7rem;color:var(--oro)}
+.dropzone .big{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin:4px 0}
+.dropzone .small{font-size:.8rem;color:var(--inchiostro-50)}
+#fileInput{display:none}
+
+.previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.previews .thumb{position:relative;width:64px;height:64px;border-radius:7px;overflow:hidden;border:1px solid var(--oro-chiaro);background:#efe7d5}
+.previews .thumb img{width:100%;height:100%;object-fit:cover}
+.previews .thumb .rm{position:absolute;top:0;right:2px;color:#fff;font-size:.85rem;cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,.8);line-height:1.1}
+.previews .thumb .vid{position:absolute;bottom:2px;left:4px;color:#fff;font-size:.6rem;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+
+.btn{display:block;width:100%;margin-top:18px;padding:14px;border:0;border-radius:9px;cursor:pointer;
+  background:linear-gradient(180deg,#caa856,#b8943f);color:#fff5e0;font-family:'Jost',sans-serif;
+  font-weight:400;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;transition:filter .2s}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.55;cursor:default;filter:none}
+.btn.ghost{background:none;border:1px solid var(--oro-chiaro);color:var(--inchiostro-50)}
+
+/* barra di avanzamento */
+.progress{height:4px;background:rgba(227,210,160,.4);border-radius:3px;margin-top:14px;overflow:hidden;display:none}
+.progress.on{display:block}
+.progress span{display:block;height:100%;width:0;background:var(--oro);transition:width .35s ease}
+
+.status{text-align:center;font-size:.85rem;margin-top:12px;min-height:1.2em}
+.status.ok{color:#5a7d4f}
+.status.err{color:#a4503e}
+.note{font-size:.72rem;color:var(--inchiostro-50);text-align:center;margin-top:10px;line-height:1.5}
+
+.album{padding:14px 0 40px}
+#gallery{columns:2;column-gap:12px}
+@media(min-width:520px){#gallery{columns:3}}
+.photo{break-inside:avoid;margin-bottom:12px;background:var(--avorio-caldo);border:1px solid var(--oro-chiaro);
+  border-radius:11px;overflow:hidden;box-shadow:var(--ombra);cursor:pointer;position:relative;animation:rise .6s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.photo img,.photo video{width:100%;display:block}
+.photo .by{padding:8px 11px 10px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem}
+.photo .by .pre{font-family:'Jost',sans-serif;font-style:normal;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);display:block;margin-bottom:1px}
+.photo .del{position:absolute;top:6px;right:8px;background:rgba(164,80,62,.92);color:#fff;border:0;border-radius:6px;
+  font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;cursor:pointer;display:none}
+body.admin .photo .del{display:block}
+
+.empty{text-align:center;color:var(--inchiostro-50);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:1.4rem;padding:40px 10px}
+.count{text-align:center;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--inchiostro-50);margin-bottom:18px}
+
+.lightbox{position:fixed;inset:0;background:rgba(36,30,22,.92);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+.lightbox.open{display:flex}
+.lightbox img,.lightbox video{max-width:100%;max-height:78vh;border-radius:10px}
+.lightbox .cap{position:absolute;bottom:26px;left:0;right:0;text-align:center;color:#f5ead0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem}
+.lightbox .close{position:absolute;top:18px;right:22px;color:#f5ead0;font-size:2rem;cursor:pointer;line-height:1}
+
+.admin-bar{display:none;background:rgba(164,80,62,.1);border:1px solid rgba(164,80,62,.3);border-radius:9px;
+  padding:12px 16px;margin:0 auto 20px;font-size:.8rem;text-align:center;color:#8a4636;max-width:680px}
+body.admin .admin-bar{display:block}
+
+footer{text-align:center;padding:34px 0 46px;border-top:1px solid var(--oro-chiaro)}
+footer .names{font-family:'Cormorant Garamond',serif;font-size:2rem}
+footer .amp{font-style:italic;color:var(--oro)}
+footer .meta{font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;color:var(--inchiostro-50);margin-top:6px}
+
+@media(prefers-reduced-motion:reduce){.photo{animation:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Angela &amp; Alberto · Villa Maria Teresa</div>
+    <h1 class="names">Angela <span class="amp">&amp;</span> Alberto</h1>
+    <div class="date">12 · 09 · 2026</div>
+    <div class="place">Villa Maria Teresa — Formia</div>
+  </div>
+</header>
+
+<div class="divider"><span class="mark">✦</span></div>
+
+<section class="hero wrap">
+  <h1>I ricordi <em>di tutti</em></h1>
+  <p>Ogni vostro scatto racconta un pezzo della nostra festa. Caricate le foto del 12 settembre e costruiamo insieme l'album del nostro matrimonio.</p>
+</section>
+
+<div class="wrap">
+  <div class="qr-card">
+    <span class="corner-tr"></span><span class="corner-bl"></span>
+    <div class="mark">✦</div>
+    <div class="label">Inquadra e condividi</div>
+    <div class="sub">Apri la fotocamera del telefono e inquadra il codice</div>
+    <div id="qrcode"></div>
+    <div class="hint">oppure usa il link:</div>
+    <a class="qr-link" id="qrLink" href="#">questa pagina</a>
+  </div>
+</div>
+
+<section class="wrap">
+  <div class="section-title">
+    <span class="eyebrow">Il tuo contributo</span>
+    <h2>Aggiungi le tue foto</h2>
+  </div>
+
+  <div class="upload">
+    <div class="field">
+      <label for="guestName">Il tuo nome</label>
+      <input type="text" id="guestName" placeholder="Come ti firmi nell'album?" autocomplete="name" maxlength="40" />
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <div class="icon">✦</div>
+      <div class="big">Scegli le foto</div>
+      <div class="small">tocca qui o trascina · puoi sceglierne più di una</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*,video/*" multiple />
+
+    <div class="previews" id="previews"></div>
+
+    <div class="progress" id="progress"><span id="progressBar"></span></div>
+    <button class="btn" id="uploadBtn" disabled>Carica nell'album</button>
+    <div class="status" id="status"></div>
+    <div class="note" id="note">Le foto vengono ottimizzate automaticamente sul tuo telefono prima dell'invio.<br>Video: massimo 50 MB (circa 20 secondi).</div>
+  </div>
+</section>
+
+<div class="divider"><span class="mark">✦ ✦ ✦</span></div>
+
+<section class="album wrap">
+  <div class="section-title">
+    <span class="eyebrow">Insieme</span>
+    <h2>L'album condiviso</h2>
+  </div>
+
+  <div class="admin-bar">Modalità moderazione attiva — puoi eliminare i contenuti indesiderati.</div>
+
+  <div class="count" id="count"></div>
+  <div id="gallery"></div>
+  <div class="empty" id="empty">Ancora nessuna foto. Sii il primo a condividere un ricordo della serata.</div>
+</section>
+
+<footer>
+  <div class="names">Angela <span class="amp">&amp;</span> Alberto</div>
+  <div class="meta">12 Settembre 2026 · Villa Maria Teresa, Formia</div>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <span class="close" id="lbClose">×</span>
+  <div id="lbHolder"></div>
+  <div class="cap" id="lbCap"></div>
+</div>
+
+<script>
+/* Album condiviso Angela & Alberto */
+const CONFIG = {
+  SUPABASE_URL:      "https://wzwakveypwobmehvjupk.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d2FrdmV5cHdvYm1laHZqdXBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzcxOTMsImV4cCI6MjA5NzAxMzE5M30.cWmSiXugmUoHRS9RhJ2NLgjfpoqYs_FnELofqFn8lTc",
+  BUCKET: "wedding-photos",
+  TABLE:  "foto",
+  UPLOAD_URL: "https://albertobortolottoit.github.io/albumfoto-angela-alberto/",
+  MAX_SIDE:   1600,     // lato lungo massimo dopo compressione
+  JPEG_Q:     0.82,     // qualità JPEG
+  MAX_VIDEO:  50*1024*1024,
+  ADMIN_CODE: "angela2026"   // apri la pagina con ?admin=angela2026
+};
+
+const $ = s => document.querySelector(s);
+let supa = null, selected = [];
+
+const isLive = CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY &&
+               window.supabase && typeof window.supabase.createClient === "function";
+if (isLive) supa = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+/* modalità moderazione */
+const isAdmin = new URLSearchParams(location.search).get("admin") === CONFIG.ADMIN_CODE;
+if (isAdmin) document.body.classList.add("admin");
+
+/* ---------- QR ---------- */
+(function(){
+  const url = CONFIG.UPLOAD_URL || location.href;
+  $("#qrLink").textContent = url.replace(/^https?:\/\//,'').replace(/\/$/,'');
+  $("#qrLink").href = url;
+  if (window.QRCode) new QRCode($("#qrcode"), {
+    text:url, width:196, height:196,
+    colorDark:"#43382B", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.M
+  });
+})();
+
+/* ---------- selezione file ---------- */
+const dropzone = $("#dropzone"), fileInput = $("#fileInput");
+dropzone.onclick = () => fileInput.click();
+dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag"); });
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop", e => { e.preventDefault(); dropzone.classList.remove("drag"); addFiles(e.dataTransfer.files); });
+fileInput.onchange = () => addFiles(fileInput.files);
+
+function addFiles(list){
+  const rifiutati = [];
+  for (const f of list){
+    const isImg = f.type.startsWith("image/");
+    const isVid = f.type.startsWith("video/");
+    if (!isImg && !isVid){ rifiutati.push(f.name + " (formato non supportato)"); continue; }
+    if (isVid && f.size > CONFIG.MAX_VIDEO){
+      rifiutati.push(f.name + " (video troppo lungo, max 50 MB)"); continue;
+    }
+    selected.push(f);
+  }
+  if (rifiutati.length){
+    setStatus("Non caricati: " + rifiutati.join(" · "), "err");
+  } else setStatus("");
+  renderPreviews();
+}
+
+function renderPreviews(){
+  const box = $("#previews"); box.innerHTML = "";
+  selected.forEach((f,i) => {
+    const t = document.createElement("div"); t.className = "thumb";
+    if (f.type.startsWith("image/")){
+      const img = document.createElement("img"); img.src = URL.createObjectURL(f); t.appendChild(img);
+    } else {
+      const v = document.createElement("div"); v.className = "vid"; v.textContent = "VIDEO";
+      t.style.background = "#43382B"; t.appendChild(v);
+    }
+    const x = document.createElement("span"); x.className = "rm"; x.textContent = "×"; x.title = "Rimuovi";
+    x.onclick = e => { e.stopPropagation(); selected.splice(i,1); renderPreviews(); };
+    t.appendChild(x); box.appendChild(t);
+  });
+  $("#uploadBtn").disabled = selected.length === 0;
+  $("#uploadBtn").textContent = selected.length > 1
+    ? `Carica ${selected.length} file nell'album` : "Carica nell'album";
+}
+
+/* ---------- compressione immagini ---------- */
+function comprimi(file){
+  return new Promise(resolve => {
+    if (!file.type.startsWith("image/")) return resolve({blob:file, ext:estensione(file)});
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let {width:w, height:h} = img;
+      const max = CONFIG.MAX_SIDE;
+      if (w > max || h > max){
+        if (w > h){ h = Math.round(h * max / w); w = max; }
+        else      { w = Math.round(w * max / h); h = max; }
+      }
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      c.toBlob(b => resolve(b && b.size < file.size
+          ? {blob:b, ext:"jpg"}
+          : {blob:file, ext:estensione(file)},
+        ), "image/jpeg", CONFIG.JPEG_Q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve({blob:file, ext:estensione(file)}); };
+    img.src = url;
+  });
+}
+function estensione(f){
+  const e = (f.name.split(".").pop() || "").toLowerCase();
+  return /^[a-z0-9]{2,5}$/.test(e) ? e : "jpg";
+}
+
+/* ---------- upload ---------- */
+$("#uploadBtn").onclick = upload;
+
+async function upload(){
+  if (!selected.length) return;
+  if (!isLive){ setStatus("Connessione al server non disponibile. Riprova più tardi.", "err"); return; }
+
+  const nome = ($("#guestName").value || "").trim() || "Un invitato";
+  const btn = $("#uploadBtn"), bar = $("#progressBar");
+  btn.disabled = true;
+  $("#progress").classList.add("on");
+  const totale = selected.length;
+  let fatti = 0, errori = 0;
+
+  setStatus("Preparazione…");
+
+  for (const file of selected){
+    try{
+      const {blob, ext} = await comprimi(file);
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const up = await supa.storage.from(CONFIG.BUCKET)
+        .upload(path, blob, {upsert:false, contentType: blob.type || file.type});
+      if (up.error) throw up.error;
+
+      const {data:pub} = supa.storage.from(CONFIG.BUCKET).getPublicUrl(path);
+      const ins = await supa.from(CONFIG.TABLE).insert({
+        ospite: nome, url: pub.publicUrl, path: path,
+        tipo: file.type.startsWith("video/") ? "video" : "foto"
+      });
+      if (ins.error) throw ins.error;
+      fatti++;
+    }catch(err){
+      console.error(err);
+      errori++;
+      if (String(err.message || "").match(/exceeded|quota|payload|too large/i)){
+        setStatus("Spazio esaurito sul server. Avvisate gli sposi!", "err");
+        break;
+      }
+    }
+    bar.style.width = Math.round((fatti+errori)/totale*100) + "%";
+    setStatus(`Caricamento… ${fatti+errori} di ${totale}`);
+  }
+
+  selected = [];
+  renderPreviews();
+  setTimeout(() => { $("#progress").classList.remove("on"); bar.style.width = "0"; }, 800);
+
+  if (fatti && !errori)      setStatus("Grazie! Le tue foto sono nell'album ✦", "ok");
+  else if (fatti && errori)  setStatus(`Caricate ${fatti} su ${totale}. Riprova per le altre.`, "err");
+  else                       setStatus("Caricamento non riuscito. Controlla la connessione e riprova.", "err");
+
+  btn.disabled = selected.length === 0;
+  await loadGallery();
+}
+
+function setStatus(msg, cls){
+  const s = $("#status");
+  s.className = "status" + (cls ? " " + cls : "");
+  s.textContent = msg;
+}
+
+/* ---------- album ---------- */
+async function loadGallery(){
+  if (!isLive) return;
+  const {data, error} = await supa.from(CONFIG.TABLE)
+    .select("id,ospite,url,path,tipo,created_at").order("created_at",{ascending:false});
+  if (error){ console.error(error); return; }
+  render(data || []);
+}
+
+function render(items){
+  const g = $("#gallery"), empty = $("#empty"), count = $("#count");
+  g.innerHTML = "";
+  if (!items.length){ empty.style.display = "block"; count.textContent = ""; return; }
+  empty.style.display = "none";
+  count.textContent = items.length === 1 ? "1 ricordo condiviso" : `${items.length} ricordi condivisi`;
+
+  items.forEach(p => {
+    const card = document.createElement("div"); card.className = "photo";
+    let media;
+    if (p.tipo === "video"){
+      media = document.createElement("video");
+      media.src = p.url; media.muted = true; media.playsInline = true; media.preload = "metadata";
+    } else {
+      media = document.createElement("img");
+      media.loading = "lazy"; media.src = p.url;
+      media.alt = "Foto di " + (p.ospite || "un invitato");
+    }
+    const by = document.createElement("div"); by.className = "by";
+    by.innerHTML = `<span class="pre">Caricata da</span>${escapeHtml(p.ospite || "Un invitato")}`;
+    card.append(media, by);
+    card.onclick = () => openLightbox(p);
+
+    if (isAdmin){
+      const del = document.createElement("button");
+      del.className = "del"; del.textContent = "Elimina";
+      del.onclick = async e => {
+        e.stopPropagation();
+        if (!confirm("Eliminare definitivamente questo contenuto?")) return;
+        try{
+          if (p.path) await supa.storage.from(CONFIG.BUCKET).remove([p.path]);
+          await supa.from(CONFIG.TABLE).delete().eq("id", p.id);
+          loadGallery();
+        }catch(err){ alert("Eliminazione non riuscita."); console.error(err); }
+      };
+      card.appendChild(del);
+    }
+    g.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- lightbox ---------- */
+function openLightbox(p){
+  const holder = $("#lbHolder"); holder.innerHTML = "";
+  if (p.tipo === "video"){
+    const v = document.createElement("video");
+    v.src = p.url; v.controls = true; v.autoplay = true; v.playsInline = true;
+    holder.appendChild(v);
+  } else {
+    const i = document.createElement("img"); i.src = p.url; holder.appendChild(i);
+  }
+  $("#lbCap").textContent = "✦  " + (p.ospite || "Un invitato");
+  $("#lightbox").classList.add("open");
+}
+function closeLightbox(){
+  $("#lightbox").classList.remove("open");
+  $("#lbHolder").innerHTML = "";
+}
+$("#lbClose").onclick = closeLightbox;
+$("#lightbox").onclick = e => { if (e.target.id === "lightbox") closeLightbox(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+
+/* ---------- avvio ---------- */
+loadGallery();
+if (isLive) setInterval(loadGallery, 25000);
+</script>
+</body>
+</html>
