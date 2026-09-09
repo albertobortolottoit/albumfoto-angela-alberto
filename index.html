@@ -152,7 +152,7 @@ footer .meta{font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;colo
 <div class="divider"><span class="mark">✦</span></div>
 
 <section class="hero wrap">
-  <h1>I ricordi <em>di tutti</em></h1>
+  <h1>Il nostro giorno <em>con i vostri occhi</em></h1>
   <p>Ogni vostro scatto racconta un pezzo della nostra festa. Caricate le foto del 12 settembre e costruiamo insieme l'album del nostro matrimonio.</p>
 </section>
 
@@ -192,7 +192,7 @@ footer .meta{font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;colo
     <div class="progress" id="progress"><span id="progressBar"></span></div>
     <button class="btn" id="uploadBtn" disabled>Carica nell'album</button>
     <div class="status" id="status"></div>
-    <div class="note" id="note">Le foto vengono ottimizzate automaticamente sul tuo telefono prima dell'invio.</div>
+    <div class="note" id="note">Le foto vengono ottimizzate automaticamente sul tuo telefono prima dell'invio.<br>Video: fino a 500 MB.</div>
   </div>
 </section>
 
@@ -273,7 +273,7 @@ function addFiles(list){
     const isVid = f.type.startsWith("video/");
     if (!isImg && !isVid){ rifiutati.push(f.name + " (formato non supportato)"); continue; }
     if (isVid && f.size > CONFIG.MAX_VIDEO){
-      rifiutati.push(f.name + " (video troppo lungo, max 500 MB)"); continue;
+      rifiutati.push(f.name + " (video troppo grande, max 500 MB)"); continue;
     }
     selected.push(f);
   }
